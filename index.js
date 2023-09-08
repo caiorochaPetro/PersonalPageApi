@@ -14,7 +14,7 @@ const sequelize = new Sequelize(
       host: process.env.DB_HOST,
       port: process.env.DB_PORT,
       dialect: 'postgres', // Especifique o dialeto do PostgreSQL
-      logging: true, // Desabilite o log das queries SQL (opcional)
+      logging: false, // Desabilite o log das queries SQL (opcional)
     }
   );
   
@@ -318,6 +318,6 @@ const server = new ApolloServer({
   },
 });
 
-server.listen().then(({ url }) => {
+server.listen({port: 8080}).then(({ url }) => {
     console.log(`Servidor Apollo pronto em ${url}`);
   });
