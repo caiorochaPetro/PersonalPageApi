@@ -4,8 +4,6 @@ import { config } from 'dotenv';
 import { Sequelize, DataTypes} from 'sequelize';
 
 import jwt from 'jsonwebtoken';
-
-
 config();
 
 const sequelize = new Sequelize(
@@ -48,11 +46,20 @@ const User = sequelize.define('user', {
     name: {type: DataTypes.STRING},
     pass:{type: DataTypes.STRING},
     email: {type: DataTypes.STRING},
-    createdAt: {type: DataTypes.STRING},
-    updatedAt:{type: DataTypes.STRING}
+    createdAt: {type: DataTypes.DATE},
+    updatedAt:{type: DataTypes.DATE}
   },{
     tableName: "user"
   });
+
+const Project = sequelize.define('project',{
+  id: {type: DataTypes.INTEGER, primaryKey: true},
+  title: {type: DataTypes.STRING},
+  content: {type: DataTypes.STRING},
+  createdAt: {type: DataTypes.DATE},
+  updatedAt:{type: DataTypes.DATE}
+},
+  {tableName: 'project'});
 
 sequelize.sync();
 
@@ -126,6 +133,11 @@ const resolvers = {
       catch(error){
         throw error;
       }
+      },
+      getAllProjects: async()=>{
+        let obj = await Project.findAll();
+        return obj;
+
       }
   },
   Mutation: {
@@ -226,6 +238,14 @@ const typeDefs = gql`
 
     }
 
+    type project {
+      id: Int
+      title: String
+      content: String
+      createdAt: Date
+      updatedAt: Date
+    }
+
     type idPick{
       id: Int
     }
@@ -239,6 +259,7 @@ const typeDefs = gql`
         getAllPosts: [post]
         getOnePost(id: Int): post
         getOneUser(input: passName): user
+        getAllProjects: [project]
         
     }
     input inPost{
