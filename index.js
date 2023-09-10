@@ -1,7 +1,7 @@
 import { ApolloServer } from 'apollo-server';
 import {gql} from 'apollo-server';
 import { config } from 'dotenv';
-import { Sequelize, DataTypes} from 'sequelize';
+import { Sequelize, DataTypes, Op} from 'sequelize';
 
 import jwt from 'jsonwebtoken';
 config();
@@ -84,10 +84,20 @@ async function verifyToken (token){
 
 //Relations
 
-async function resolver_getAllPosts(){
-    let data = await Post.findAll();
-    console.log(data);
-    return data;
+async function resolver_getAllPosts(page, amount){
+    const offset = (page - 1) * amount;
+    const data = await Post.findAll({
+      limit: amount,
+      offset
+    });
+    const totalObj = await Post.findAll();
+    const total = totalObj.length;
+    const response = {
+      posts: data,
+      total: total
+    }
+
+    return response;
 }
 
 async function resolver_getOnePost(args){
@@ -100,8 +110,9 @@ async function resolver_getOnePost(args){
 
 const resolvers = {
   Query: {
-      getAllPosts: async () => {
-        let data = resolver_getAllPosts();
+      getAllPosts: async (_,args) => {
+        const {page, amount} = args;
+        let data = await resolver_getAllPosts(page, amount);
         return data;
       },
       getOnePost: async (_,args) =>{
@@ -138,6 +149,17 @@ const resolvers = {
         let obj = await Project.findAll();
         return obj;
 
+      },
+      getResearch: async (_, args) =>{
+        let {key} = args;
+        let posts = Post.findAll({
+          where: {
+            title: {
+              [Op.like]: `%${key}%`,
+            }
+          }
+        })
+        return posts;
       }
   },
   Mutation: {
@@ -227,6 +249,11 @@ const typeDefs = gql`
         updatedAt: Date
     }
 
+    type postResponse {
+      posts: [post]
+      total: Int
+    }
+
     type user {
       id: Int
       pass: String
@@ -255,10 +282,17 @@ const typeDefs = gql`
       pass: String
     }
 
+    type research {
+      title: String
+      type: String
+      link: String
+    }
+
     type Query {
-        getAllPosts: [post]
+        getAllPosts(page: Int!, amount: Int!): postResponse
         getOnePost(id: Int): post
         getOneUser(input: passName): user
+        getResearch(key: String): [post]
         getAllProjects: [project]
         
     }
