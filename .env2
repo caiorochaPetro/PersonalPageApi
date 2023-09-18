@@ -1,6 +1,0 @@
-DB_USER=mainAdminUser@personalsitedatabase
-DB_HOST=personalsitedatabase.postgres.database.azure.com
-DB_NAME=personal
-DB_PASSWORD=1@Mainpasswordadmin
-DB_PORT=5432
-SECRET_KEY = your-secret-key

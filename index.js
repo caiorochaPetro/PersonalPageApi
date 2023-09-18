@@ -154,11 +154,15 @@ const resolvers = {
         let {key} = args;
         let posts = Post.findAll({
           where: {
-            title: {
-              [Op.like]: `%${key}%`,
-            }
-          }
-        })
+            [Op.or]: [
+              {
+                title: {
+                  [Op.like]: `%${key}%`,
+                },
+              }
+            ],
+          },
+        });
         return posts;
       }
   },
